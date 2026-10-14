@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Panel Ezkutua LH 1.2 - Partekagarria</title>
+<title>Panel Ezkutua LH 1.4 - Letra-botoi altuagoak</title>
 <style>
 :root{--gold:#ffd34d;--green:#17a317;--red:#cf1d1d;--yellow:#ffd21f;--purple:#832bd8}
 *{box-sizing:border-box}
@@ -34,7 +34,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 .active{outline:5px solid white;box-shadow:0 0 18px white}
 .letters{display:flex;flex-direction:column;justify-content:center;gap:1vh;height:100%;padding-top:2vh}
 .row{display:flex;justify-content:center;gap:.6vw}
-.key{width:3.15vw;min-width:32px;height:5.4vh;border-radius:8px;border:3px solid #666;background:linear-gradient(#1b1b1b,#050505);color:#fff;font-size:clamp(1.3rem,2.5vw,2.3rem);font-weight:900;cursor:pointer}.key.vowel{background:linear-gradient(#7b2cff,#3b087f);border-color:#e0c8ff;color:#fff}
+.key{width:3.15vw;min-width:32px;height:7vh;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;border-radius:8px;border:3px solid #666;background:linear-gradient(#1b1b1b,#050505);color:#fff;font-size:clamp(1.3rem,2.5vw,2.3rem);font-weight:900;cursor:pointer}.key.vowel{background:linear-gradient(#7b2cff,#3b087f);border-color:#e0c8ff;color:#fff}
 .key.selected{background:linear-gradient(#148be8,#0754b0);border-color:#cfe9ff}
 .key.used{background:linear-gradient(#198b1c,#095d0c);border-color:#88ff88}
 .key:disabled{opacity:.45;cursor:not-allowed}
@@ -126,7 +126,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 
 <div id="setupOverlay" style="position:fixed;inset:0;background:#05102bf5;z-index:30;display:none;overflow:auto;padding:2vh 3vw">
  <div style="max-width:1050px;margin:auto;background:#0c2c69;border:3px solid #ffd34d;border-radius:18px;padding:20px">
- <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v1.2 · SAIOA PRESTATU</h1>
+ <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v1.4 · SAIOA PRESTATU</h1>
  <p>Hautatu zure datu-iturria, aukeratu panelak eta antolatu geziekin. Ez da saiorik gordeko.</p>
  <div style="padding:12px;background:#071b47;border:1px solid #6685bb;border-radius:8px;margin:12px 0">
  <label for="sourceUrl"><strong>GOOGLE SHEETS DATU-ITURRIA</strong></label>
