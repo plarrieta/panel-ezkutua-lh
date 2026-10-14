@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Panel Ezkutua LH 1.4 - Letra-botoi altuagoak</title>
+<title>Panel Ezkutua LH 1.5 - Irudi pista leihoa</title>
 <style>
 :root{--gold:#ffd34d;--green:#17a317;--red:#cf1d1d;--yellow:#ffd21f;--purple:#832bd8}
 *{box-sizing:border-box}
@@ -43,6 +43,17 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 .btn{border:0;border-radius:9px;color:white;font-weight:900;font-size:clamp(.78rem,1.05vw,1.1rem);padding:.8vh .5vw;cursor:pointer;box-shadow:inset 0 0 10px #ffffff55;min-width:0;width:100%}
 .bGreen{background:linear-gradient(#24c922,#0a8b0b)}.bOrange{background:linear-gradient(#ffb11b,#d77700)}.bPurple{background:linear-gradient(#a83cff,#6820ba)}.bRed{background:linear-gradient(#ff3d3d,#b61111)}
 .small{font-size:1rem;opacity:.9}
+.imageClueBtn{position:absolute;right:12px;top:50%;transform:translateY(-50%);border:2px solid #b7dcff;border-radius:9px;background:linear-gradient(#1976d2,#064181);color:white;font-weight:900;padding:9px 14px;cursor:pointer;font-size:clamp(.85rem,1vw,1.1rem);white-space:nowrap}
+.clueBox:has(.imageClueBtn:not([hidden])){padding-right:130px;padding-left:130px}
+.imageClueBtn[hidden]{display:none!important}
+.imageOverlay{position:fixed;inset:0;z-index:45;background:rgba(0,5,21,.91);display:none;align-items:center;justify-content:center;padding:3vh 3vw}
+.imageOverlay.open{display:flex}
+.imageModal{position:relative;width:min(1150px,94vw);max-height:94vh;border:4px solid var(--gold);border-radius:20px;background:linear-gradient(#103a91,#061a42);padding:22px;text-align:center;box-shadow:0 0 35px #ffd34d88}
+.imageModal img{display:block;margin:10px auto;max-width:100%;max-height:72vh;object-fit:contain;border-radius:10px}
+.imageModal h2{margin:0 48px 12px;font-size:clamp(1.2rem,2.5vw,2rem)}
+.imageClose{position:absolute;right:10px;top:8px;border:2px solid #b7dcff;background:#092456;color:white;border-radius:9px;font-size:1.5rem;font-weight:900;cursor:pointer;padding:3px 12px}
+@media(max-width:900px){.clueBox:has(.imageClueBtn:not([hidden])){padding-left:10px;padding-right:10px;padding-bottom:50px}.imageClueBtn{top:auto;bottom:5px;right:50%;transform:translateX(50%)}}
+
 .fs{position:fixed;top:14px;right:14px;z-index:6}
 .miniBtn{background:#0b2d70;color:white;border:2px solid #8eb8ff;border-radius:8px;padding:8px 12px;font-weight:900;cursor:pointer}
 .winOverlay,.missOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:20;pointer-events:auto}
@@ -87,7 +98,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
   <div class="top">
     <div class="clueBox">
       <div class="clueLabel">PISTA</div>
-      <div id="clue" class="clue">KARGATZEN...</div><img id="clueImage" alt="Irudi-pista" style="display:none;max-height:15vh;max-width:100%;object-fit:contain;margin:5px auto;border-radius:8px" onerror="this.style.display='none';document.getElementById('imageError').textContent='Irudia ezin da erakutsi. Egiaztatu Drive-ko esteka eta baimenak.'"><div id="imageError" style="font-size:12px;color:#ffcf86"></div>
+      <div id="clue" class="clue">KARGATZEN...</div><button id="imageClueBtn" class="imageClueBtn" onclick="openImageClue()" hidden>🖼 IRUDIA</button>
       <div id="area" class="small">Google Sheets</div>
     </div>
   </div>
@@ -124,9 +135,17 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
   </div>
 </div>
 
+<div id="imageOverlay" class="imageOverlay" role="dialog" aria-modal="true" aria-label="Irudi-pista" onclick="if(event.target===this)closeImageClue()">
+  <div class="imageModal">
+    <button class="imageClose" onclick="closeImageClue()" aria-label="Itxi irudia">✕</button>
+    <h2>IRUDI-PISTA</h2>
+    <img id="largeClueImage" alt="Panelaren irudi-pista" onerror="document.getElementById('imageModalError').textContent='Irudia ezin da erakutsi. Egiaztatu esteka eta partekatzeko baimenak.';this.style.display='none'">
+    <p id="imageModalError" style="color:#ffd34d"></p>
+  </div>
+</div>
 <div id="setupOverlay" style="position:fixed;inset:0;background:#05102bf5;z-index:30;display:none;overflow:auto;padding:2vh 3vw">
  <div style="max-width:1050px;margin:auto;background:#0c2c69;border:3px solid #ffd34d;border-radius:18px;padding:20px">
- <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v1.4 · SAIOA PRESTATU</h1>
+ <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v1.5 · SAIOA PRESTATU</h1>
  <p>Hautatu zure datu-iturria, aukeratu panelak eta antolatu geziekin. Ez da saiorik gordeko.</p>
  <div style="padding:12px;background:#071b47;border:1px solid #6685bb;border-radius:8px;margin:12px 0">
  <label for="sourceUrl"><strong>GOOGLE SHEETS DATU-ITURRIA</strong></label>
@@ -273,15 +292,29 @@ function loadPuzzle(i){
   const p=puzzles[i];
   document.getElementById('clue').textContent=p.pista||'IRUDI-PISTA';
   document.getElementById('area').textContent=`${p.arloa}${p.gaia?' · '+p.gaia:''} — ${sessionPosition+1}/${session.length}`;
-  const img=document.getElementById('clueImage');
-  document.getElementById('imageError').textContent='';
+  closeImageClue();
   const url=driveImageUrl(p.irudia);
-  img.style.display=url?'block':'none';
-  if(url)img.src=url;else img.removeAttribute('src');
+  const imageBtn=document.getElementById('imageClueBtn');
+  imageBtn.hidden=!url;
+  imageBtn.dataset.url=url;
   grid=makeGrid(normalize(p.panela));
   renderKeys();renderBoard();
   status(`${sessionPosition+1}/${session.length}. panela. Aukeratu letra bat.`);
 }
+function openImageClue(){
+  const url=document.getElementById('imageClueBtn').dataset.url;
+  if(!url)return;
+  const img=document.getElementById('largeClueImage');
+  document.getElementById('imageModalError').textContent='';
+  img.style.display='block';
+  img.src=url;
+  document.getElementById('imageOverlay').classList.add('open');
+  document.getElementById('imageOverlay').querySelector('.imageClose').focus();
+}
+function closeImageClue(){
+  document.getElementById('imageOverlay').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeImageClue()});
 function driveImageUrl(raw){
   if(!raw)return '';
   const s=raw.trim();
@@ -494,7 +527,7 @@ function nextPuzzle(){
   if(sessionPosition+1>=session.length){
     finished=true;document.getElementById('clue').textContent='SAIOA AMAITU DA';
     document.getElementById('area').textContent=`1. TALDEA: ${scores[0]} · 2. TALDEA: ${scores[1]}`;
-    document.getElementById('clueImage').style.display='none';
+    closeImageClue();document.getElementById('imageClueBtn').hidden=true;
     document.getElementById('board').innerHTML='';
     status('Saioa amaitu da. Beste saio bat prestatzeko, sakatu SAIOA PRESTATU.');
     return;
@@ -550,7 +583,7 @@ function toggleFullScreen(){
 }
 
 let chosen=[];
-function showSetup(){
+function showSetup(){closeImageClue();
  document.getElementById('setupOverlay').style.display='block';
  const areas=[...new Set(puzzles.map(p=>p.arloa).filter(Boolean))].sort();
  document.getElementById('areaFilter').innerHTML='<option value="">ARLO GUZTIAK</option>'+
