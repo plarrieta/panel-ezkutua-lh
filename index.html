@@ -175,7 +175,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 <div class="missOverlay" id="infoOverlay">
   <div class="missBox" id="infoBox">
     <div class="missTitle" id="infoTitle">BOKALA EROSI DA</div>
-    <div class="missLetter" id="infoBig">-300</div>
+    <div class="missLetter" id="infoBig">-100</div>
   </div>
 </div>
 
@@ -186,7 +186,7 @@ let puzzles=[],current=0,grid=[],selectedLetter=null,activeTeam=0,scores=[0,0],i
 const ROWS=4; let COLS=16; let session=[],sessionPosition=0,finished=false;
 
 const VOWELS=['A','E','I','O','U'];
-const VOWEL_COST=300;
+const VOWEL_COST=100;
 const CONSONANT_VALUE=100;
 
 const letters=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
@@ -368,7 +368,7 @@ async function selectLetter(l){
 
   if(isVowel(l) && scores[activeTeam] < VOWEL_COST){
     showInfoMessage('EZ DUZU NAHIKOA PUNTURIK','BOKAL BAT EROSTEKO',1500);
-    status('300 puntu behar dira bokal bat erosteko.');
+    status('100 puntu behar dira bokal bat erosteko.');
     return;
   }
 
@@ -393,14 +393,14 @@ async function revealSelectedLetter(){
     selectedLetter=null;
     isAnimating=false;
     await showInfoMessage('EZ DUZU NAHIKOA PUNTURIK','BOKAL BAT EROSTEKO',1500);
-    status('300 puntu behar dira bokal bat erosteko.');
+    status('100 puntu behar dira bokal bat erosteko.');
     return;
   }
 
   if(vowel){
     scores[activeTeam]-=VOWEL_COST;
     renderTeams();
-    await showInfoMessage('🟡 BOKALA EROSI DA','-300 PUNTU',900);
+    await showInfoMessage('🟡 BOKALA EROSI DA','-100 PUNTU',900);
   }
 
   const matches=[];
