@@ -30,8 +30,16 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 .teams{display:flex;flex-direction:column;gap:.8vh;margin-top:2.2vh}
 .team{display:grid;grid-template-columns:1fr .65fr;gap:.6vw;align-items:center}
 .teamName,.score{border-radius:9px;padding:.8vh .6vw;font-size:clamp(1rem,1.8vw,2rem);font-weight:900;text-align:center}
-.teamName{cursor:pointer}.score{background:#111;border:2px solid #777}.t1{background:var(--red)}.t2{background:var(--yellow);color:#111}
-.active{outline:5px solid white;box-shadow:0 0 18px white}
+/* Taldeen egoera: ez-aktiboak ilun, aktiboa argi eta marko sendoarekin. */
+.teamName{cursor:pointer;border:4px solid transparent;transition:background .2s ease,border-color .2s ease,box-shadow .2s ease,color .2s ease,filter .2s ease}
+.score{background:#111;border:2px solid #777}
+.t1{background:#851c1c;color:#f7cccc}
+.t2{background:#88701a;color:#f8e6ae}
+.teamName.t1.active{background:#f02a2a;color:#fff}
+.teamName.t2.active{background:#ffd526;color:#151515}
+.teamName.active{border-color:#fff;box-shadow:0 0 15px #ffffffaa,inset 0 0 7px #ffffff44}
+.teamName:not(.active){border-color:#606575;box-shadow:none}
+.teamName:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .letters{display:flex;flex-direction:column;justify-content:center;gap:1vh;height:100%;padding-top:2vh}
 .row{display:flex;justify-content:center;gap:.6vw}
 .key{width:3.15vw;min-width:32px;height:7vh;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;border-radius:8px;border:3px solid #666;background:linear-gradient(#1b1b1b,#050505);color:#fff;font-size:clamp(1.3rem,2.5vw,2.3rem);font-weight:900;cursor:pointer}.key.vowel{background:linear-gradient(#7b2cff,#3b087f);border-color:#e0c8ff;color:#fff}
