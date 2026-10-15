@@ -91,6 +91,29 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 }
 
 @media(max-width:900px){body{overflow:auto}.app{height:auto;overflow:auto}.top,.boardWrap,.bottom{height:auto}.bottom{grid-template-columns:1fr}.board{height:260px}.key{width:44px}.clueBox{width:92vw}}
+
+/* v2.4: Oharrak LETRAK eremuaren gainean soilik, panela estali gabe. */
+#missOverlay,#infoOverlay{
+  inset:auto;position:fixed;display:none;align-items:center;justify-content:center;
+  padding:5px;background:transparent;z-index:25;overflow:hidden;
+}
+#missOverlay .missBox,#infoOverlay .missBox{
+  width:100%;height:100%;max-width:none;min-width:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(4px,1vh,10px);padding:clamp(8px,1.2vw,18px);
+  border:3px solid #ff4b4b;border-radius:15px;
+  box-shadow:0 0 16px #ff3d3d99;animation:popWin .35s ease-out;
+}
+#infoOverlay .missBox{border-color:var(--gold);box-shadow:0 0 16px #ffd34d99}
+#missOverlay .missTitle,#infoOverlay .missTitle{
+  font-size:clamp(14px,2.1vw,27px);line-height:1.08;margin:0;
+  overflow-wrap:break-word;text-shadow:0 0 10px #ff3d3d;
+}
+#infoOverlay .missTitle{text-shadow:0 0 10px #ffd34d}
+#missOverlay .missLetter,#infoOverlay .missLetter{
+  font-size:clamp(19px,3vw,40px);line-height:1.12;margin:0;
+  overflow-wrap:anywhere;
+}
 </style>
 </head>
 
@@ -149,15 +172,16 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 </div>
 <div id="setupOverlay" style="position:fixed;inset:0;background:#05102bf5;z-index:30;display:none;overflow:auto;padding:2vh 3vw">
  <div style="max-width:1050px;margin:auto;background:#0c2c69;border:3px solid #ffd34d;border-radius:18px;padding:20px">
- <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v2.1 · SAIOA PRESTATU</h1>
+ <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v2.2 · SAIOA PRESTATU</h1>
  <p>Hautatu zure datu-iturria, aukeratu panelak eta antolatu geziekin. Ez da saiorik gordeko.</p>
  <div style="padding:12px;background:#071b47;border:1px solid #6685bb;border-radius:8px;margin:12px 0">
  <label for="sourceUrl"><strong>GOOGLE SHEETS DATU-ITURRIA</strong></label>
  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px">
  <input id="sourceUrl" type="url" placeholder="Itsatsi zure Google Sheets-eko CSV esteka publikoa" style="flex:1;min-width:220px;padding:10px;border-radius:7px;border:1px solid #8ca8db;font-size:14px" />
  <button class="miniBtn" onclick="useDefaultSource()">EREDUKO PANELAK</button>
- <button class="miniBtn" onclick="loadCSVAuto()">KARGATU ESTEKATIK</button>
+ <button id="loadFromUrlBtn" class="miniBtn" onclick="loadCSVAuto()">KARGATU ESTEKATIK</button>
  </div>
+ <div id="csvLoadFeedback" role="status" aria-live="polite" style="display:none;margin-top:9px;padding:9px 11px;border-radius:8px;font-weight:800;font-size:14px"></div>
  <small style="display:block;margin-top:7px">Beste irakasle batek bere kalkulu-orria argitaratu behar du: Fitxategia → Partekatu → Argitaratu sarean → CSV. Esteka ez da gordetzen.</small>
  </div>
  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
@@ -210,7 +234,7 @@ let puzzles=[],current=0,grid=[],selectedLetter=null,activeTeam=0,scores=[0,0],i
 const ROWS=4; let COLS=16; let session=[],sessionPosition=0,finished=false;
 
 const VOWELS=['A','E','I','O','U'];
-const VOWEL_COST=100;
+const VOWEL_COST=200;
 const CONSONANT_VALUE=100;
 
 const letters=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
@@ -235,27 +259,43 @@ async function init(){renderTeams();renderKeys();document.getElementById('source
 
 init();
 
+let csvLoading=false;
+function csvFeedback(message,kind){
+ const el=document.getElementById('csvLoadFeedback');
+ const styles={loading:['#143b79','#a8d5ff'],success:['#104f35','#a5ffcd'],error:['#621d2b','#ffd0d0']};
+ const [background,color]=styles[kind]||styles.loading;
+ el.style.display='block';el.style.background=background;el.style.color=color;
+ el.textContent=message;
+}
 async function loadCSVAuto(){
-  try{
+ if(csvLoading)return;
+ csvLoading=true;
+ const button=document.getElementById('loadFromUrlBtn');
+ button.disabled=true;button.textContent='KARGATZEN...';button.setAttribute('aria-busy','true');
+ csvFeedback('KARGATZEN... Google Sheets-eko panelak irakurtzen ari gara.','loading');
+ document.getElementById('setupStatus').textContent='';
+ try{
     status('Google Sheets-eko panelak kargatzen...');
-    document.getElementById('clue').textContent='KARGATZEN...';
-    document.getElementById('area').textContent='Google Sheets';
-
     const url=currentCsvUrl();
     if(!validCsvUrl(url))throw new Error('Sartu Google Sheets-en argitaratutako CSV esteka (…/pub?…&output=csv).');
     updateCsvLink();
     const res=await fetch(url,{cache:'no-store'});
-    if(!res.ok)throw new Error('CSV esteka ezin izan da ireki');
-
+    if(!res.ok)throw new Error('CSV esteka ezin izan da ireki (HTTP '+res.status+').');
     const txt=await res.text();
     importCSVText(txt);
-    document.getElementById('setupStatus').textContent=`${puzzles.length} panel kargatuta.`;
     showSetup();
+    const message=`✓ ${puzzles.length} PANEL KARGATU DIRA`;
+    csvFeedback(message,'success');
+    document.getElementById('setupStatus').textContent=`${puzzles.length} panel kargatu dira Google Sheets-etik. Aukeraketa berriro egin behar da.`;
     status(`${puzzles.length} panel kargatu dira. Prestatu saioa.`);
   }catch(e){
-    document.getElementById('setupStatus').textContent='Ezin izan da CSV esteka kargatu: '+e.message+'. Saiatu DESKARGATU CSV eta aukeratu fitxategia.';
+    const message='✕ EZIN IZAN DIRA PANELAK KARGATU: '+e.message;
+    csvFeedback(message,'error');
+    document.getElementById('setupStatus').textContent='Saiatu berriro edo erabili beheko CSV fitxategia.';
     status('CSV konexioa: '+e.message);
-    showSetup();
+  }finally{
+    csvLoading=false;
+    button.disabled=false;button.textContent='KARGATU ESTEKATIK';button.removeAttribute('aria-busy');
   }
 }
 function importCSVText(txt){
@@ -277,9 +317,10 @@ async function importLocalCSV(input){
   try{
     importCSVText(await f.text());
     document.getElementById('setupStatus').textContent=`${puzzles.length} panel kargatu dira fitxategitik.`;
+    csvFeedback(`✓ ${puzzles.length} PANEL KARGATU DIRA (CSV FITXATEGITIK)`,'success');
     showSetup();
     status(`${puzzles.length} panel kargatu dira.`);
-  }catch(e){document.getElementById('setupStatus').textContent='CSV errorea: '+e.message;}
+  }catch(e){document.getElementById('setupStatus').textContent='CSV errorea: '+e.message;csvFeedback('✕ CSV ERROREA: '+e.message,'error');}
 }
 
 function resetRemainingPanels(){remainingPanels=puzzles.map((_,i)=>i);shuffleArray(remainingPanels)}
@@ -413,7 +454,7 @@ async function selectLetter(l){
 
   if(isVowel(l) && scores[activeTeam] < VOWEL_COST){
     showInfoMessage('EZ DUZU NAHIKOA PUNTURIK','BOKAL BAT EROSTEKO',1500);
-    status('100 puntu behar dira bokal bat erosteko.');
+    status('200 puntu behar dira bokal bat erosteko.');
     return;
   }
 
@@ -438,14 +479,14 @@ async function revealSelectedLetter(){
     selectedLetter=null;
     isAnimating=false;
     await showInfoMessage('EZ DUZU NAHIKOA PUNTURIK','BOKAL BAT EROSTEKO',1500);
-    status('100 puntu behar dira bokal bat erosteko.');
+    status('200 puntu behar dira bokal bat erosteko.');
     return;
   }
 
   if(vowel){
     scores[activeTeam]-=VOWEL_COST;
     renderTeams();
-    await showInfoMessage('🟡 BOKALA EROSI DA','-100 PUNTU',900);
+    await showInfoMessage('🟡 BOKALA EROSI DA','-200 PUNTU',900);
   }
 
   const matches=[];
@@ -499,8 +540,25 @@ async function revealSelectedLetter(){
   isAnimating=false;
 }
 
+function positionLetterNotice(id){
+  const target=document.querySelector('.bottom .panel:last-child');
+  const notice=document.getElementById(id);
+  if(!target||!notice)return;
+  const r=target.getBoundingClientRect();
+  notice.style.left=r.left+'px';
+  notice.style.top=r.top+'px';
+  notice.style.width=r.width+'px';
+  notice.style.height=r.height+'px';
+}
+window.addEventListener('resize',()=>{
+  ['missOverlay','infoOverlay'].forEach(id=>{
+    if(document.getElementById(id).style.display==='flex')positionLetterNotice(id);
+  });
+});
+
 async function showMissMessage(letter){
   document.getElementById('missLetter').textContent=letter;
+  positionLetterNotice('missOverlay');
   document.getElementById('missOverlay').style.display='flex';
   status(`${letter} ez dago panelean. Txanda pasatzen da.`);
   await wait(1700);
@@ -510,6 +568,7 @@ async function showMissMessage(letter){
 async function showInfoMessage(title,big,duration=1000){
   document.getElementById('infoTitle').textContent=title;
   document.getElementById('infoBig').textContent=big;
+  positionLetterNotice('infoOverlay');
   document.getElementById('infoOverlay').style.display='flex';
   await wait(duration);
   document.getElementById('infoOverlay').style.display='none';
