@@ -96,7 +96,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 
 <body>
 
-<button class="miniBtn fs" onclick="openInNewWindow()" title="Ireki leiho berri batean">↗</button>
+<button id="fullscreenBtn" class="miniBtn fs" onclick="toggleFullScreen()" title="Pantaila osoa" aria-label="Aktibatu pantaila osoa" aria-pressed="false">⛶</button>
 
 <div class="app">
   <div class="top">
@@ -579,19 +579,28 @@ function openInNewWindow(){
   w.document.close();
 }
 
-function toggleFullScreen(){
-  const element=document.documentElement;
-  if(!document.fullscreenElement){
-    if(element.requestFullscreen)element.requestFullscreen();
-    else if(element.webkitRequestFullscreen)element.webkitRequestFullscreen();
-    else if(element.msRequestFullscreen)element.msRequestFullscreen();
-    else alert('Pantaila osoa ez dago erabilgarri nabigatzaile honetan.');
-  }else{
-    if(document.exitFullscreen)document.exitFullscreen();
-    else if(document.webkitExitFullscreen)document.webkitExitFullscreen();
-    else if(document.msExitFullscreen)document.msExitFullscreen();
+async function toggleFullScreen(){
+  try {
+    if (!document.fullscreenElement) {
+      if (!document.documentElement.requestFullscreen) throw new Error('Ez dago erabilgarri');
+      await document.documentElement.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  } catch(e) {
+    alert('Ezin da pantaila osoa aktibatu hemen. Ireki jokoa zuzenean GitHub Pages-en edo erabili Chromebookeko pantaila osoko tekla.');
   }
 }
+function updateFullscreenButton(){
+  const btn=document.getElementById('fullscreenBtn');
+  if(!btn)return;
+  const active=!!document.fullscreenElement;
+  btn.textContent=active?'⤢':'⛶';
+  btn.title=active?'Irten pantaila osotik':'Pantaila osoa';
+  btn.setAttribute('aria-label',btn.title);
+  btn.setAttribute('aria-pressed',String(active));
+}
+document.addEventListener('fullscreenchange',updateFullscreenButton);
 
 let chosen=[];
 function showSetup(){closeImageClue();
