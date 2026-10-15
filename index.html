@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Panel Ezkutua LH 1.6 - Irudi pista miniatura</title>
+<title>Panel Ezkutua LH 1.7 - Irudi pista miniatura</title>
 <style>
 :root{--gold:#ffd34d;--green:#17a317;--red:#cf1d1d;--yellow:#ffd21f;--purple:#832bd8}
 *{box-sizing:border-box}
@@ -149,7 +149,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 </div>
 <div id="setupOverlay" style="position:fixed;inset:0;background:#05102bf5;z-index:30;display:none;overflow:auto;padding:2vh 3vw">
  <div style="max-width:1050px;margin:auto;background:#0c2c69;border:3px solid #ffd34d;border-radius:18px;padding:20px">
- <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v1.6 · SAIOA PRESTATU</h1>
+ <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v1.7 · SAIOA PRESTATU</h1>
  <p>Hautatu zure datu-iturria, aukeratu panelak eta antolatu geziekin. Ez da saiorik gordeko.</p>
  <div style="padding:12px;background:#071b47;border:1px solid #6685bb;border-radius:8px;margin:12px 0">
  <label for="sourceUrl"><strong>GOOGLE SHEETS DATU-ITURRIA</strong></label>
@@ -301,6 +301,13 @@ function loadPuzzle(i){
   const imageBtn=document.getElementById('imageClueBtn');
   imageBtn.hidden=!url;
   imageBtn.dataset.url=url;
+  const thumbnail=document.getElementById('smallClueImage');
+  imageBtn.classList.remove('imageError');
+  thumbnail.onerror=()=>{imageBtn.classList.add('imageError');};
+  thumbnail.onload=()=>{imageBtn.classList.remove('imageError');};
+  // Erabili irudi handiaren URL bera, miniatura eta popup-a bat etor daitezen.
+  thumbnail.removeAttribute('src');
+  if(url) thumbnail.src=url;
   grid=makeGrid(normalize(p.panela));
   renderKeys();renderBoard();
   status(`${sessionPosition+1}/${session.length}. panela. Aukeratu letra bat.`);
