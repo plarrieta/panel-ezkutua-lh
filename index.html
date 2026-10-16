@@ -30,16 +30,8 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 .teams{display:flex;flex-direction:column;gap:.8vh;margin-top:2.2vh}
 .team{display:grid;grid-template-columns:1fr .65fr;gap:.6vw;align-items:center}
 .teamName,.score{border-radius:9px;padding:.8vh .6vw;font-size:clamp(1rem,1.8vw,2rem);font-weight:900;text-align:center}
-/* Taldeen egoera: ez-aktiboak ilun, aktiboa argi eta marko sendoarekin. */
-.teamName{cursor:pointer;border:4px solid transparent;transition:background .2s ease,border-color .2s ease,box-shadow .2s ease,color .2s ease,filter .2s ease}
-.score{background:#111;border:2px solid #777}
-.t1{background:#851c1c;color:#f7cccc}
-.t2{background:#88701a;color:#f8e6ae}
-.teamName.t1.active{background:#f02a2a;color:#fff}
-.teamName.t2.active{background:#ffd526;color:#151515}
-.teamName.active{border-color:#fff;box-shadow:0 0 15px #ffffffaa,inset 0 0 7px #ffffff44}
-.teamName:not(.active){border-color:#606575;box-shadow:none}
-.teamName:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.teamName{cursor:pointer}.score{background:#111;border:2px solid #777}.t1{background:var(--red)}.t2{background:var(--yellow);color:#111}
+.active{outline:5px solid white;box-shadow:0 0 18px white}
 .letters{display:flex;flex-direction:column;justify-content:center;gap:1vh;height:100%;padding-top:2vh}
 .row{display:flex;justify-content:center;gap:.6vw}
 .key{width:3.15vw;min-width:32px;height:7vh;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;border-radius:8px;border:3px solid #666;background:linear-gradient(#1b1b1b,#050505);color:#fff;font-size:clamp(1.3rem,2.5vw,2.3rem);font-weight:900;cursor:pointer}.key.vowel{background:linear-gradient(#7b2cff,#3b087f);border-color:#e0c8ff;color:#fff}
@@ -180,7 +172,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
 </div>
 <div id="setupOverlay" style="position:fixed;inset:0;background:#05102bf5;z-index:30;display:none;overflow:auto;padding:2vh 3vw">
  <div style="max-width:1050px;margin:auto;background:#0c2c69;border:3px solid #ffd34d;border-radius:18px;padding:20px">
- <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v2.2 · SAIOA PRESTATU</h1>
+ <h1 style="margin:0 0 8px">PANEL EZKUTUA LH v2.5 · SAIOA PRESTATU</h1>
  <p>Hautatu zure datu-iturria, aukeratu panelak eta antolatu geziekin. Ez da saiorik gordeko.</p>
  <div style="padding:12px;background:#071b47;border:1px solid #6685bb;border-radius:8px;margin:12px 0">
  <label for="sourceUrl"><strong>GOOGLE SHEETS DATU-ITURRIA</strong></label>
@@ -191,6 +183,14 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
  </div>
  <div id="csvLoadFeedback" role="status" aria-live="polite" style="display:none;margin-top:9px;padding:9px 11px;border-radius:8px;font-weight:800;font-size:14px"></div>
  <small style="display:block;margin-top:7px">Beste irakasle batek bere kalkulu-orria argitaratu behar du: Fitxategia → Partekatu → Argitaratu sarean → CSV. Esteka ez da gordetzen.</small>
+ <div style="border-top:1px solid #6685bb;margin-top:13px;padding-top:12px">
+   <label for="localCsvInput"><strong>CSV FITXATEGIA KARGATU (ORDENAGAILUTIK)</strong></label>
+   <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px">
+     <input id="localCsvInput" type="file" accept=".csv,text/csv,text/plain" onchange="importLocalCSV(this)" style="max-width:100%;color:white">
+     <a id="csvDownloadLink" href="#" target="_blank" rel="noopener" style="color:#ffd34d;font-weight:700">DESKARGATU CSV</a>
+   </div>
+   <small style="display:block;margin-top:7px">Estekatik kargatu ezin bada, aukeratu aurrez deskargatutako CSV fitxategia.</small>
+ </div>
  </div>
  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
  <input id="searchPanels" placeholder="Bilatu gaia edo pista..." oninput="renderSetup()" style="flex:1 1 220px;min-width:150px;max-width:390px;padding:10px;font-size:16px">
@@ -203,13 +203,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(
  <section><h2>Panel guztiak</h2><div id="allPanels" style="max-height:31vh;overflow:auto"></div></section>
  <section><h2>Aukeratutako ordena (<span id="selectionCount">0</span>)</h2><div id="chosenPanels" style="max-height:31vh;overflow:auto"></div></section>
  </div>
- <div style="padding:12px;background:#071b47;border:1px solid #6685bb;border-radius:8px;margin:12px 0">
- <strong>Panelak kargatu</strong> · Google Sheets automatikoki saiatuko da. Huts egiten badu, deskargatu CSV fitxategia eta hautatu hemen:
- <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px">
- <input type="file" accept=".csv,text/csv,text/plain" onchange="importLocalCSV(this)" style="max-width:100%">
- <button class="miniBtn" onclick="loadCSVAuto()">BERRIRO SAIATU</button>
- <a id="csvDownloadLink" href="#" target="_blank" rel="noopener" style="color:#ffd34d">DESKARGATU CSV</a>
- </div></div><p id="setupStatus" role="status"></p>
+ <p id="setupStatus" role="status"></p>
  <button class="btn bGreen" style="font-size:20px;padding:14px" onclick="startSession()">HASI JOKOA</button>
  </div></div>
 <div class="winOverlay" id="winOverlay">
@@ -299,7 +293,7 @@ async function loadCSVAuto(){
   }catch(e){
     const message='✕ EZIN IZAN DIRA PANELAK KARGATU: '+e.message;
     csvFeedback(message,'error');
-    document.getElementById('setupStatus').textContent='Saiatu berriro edo erabili beheko CSV fitxategia.';
+    document.getElementById('setupStatus').textContent='Saiatu berriro edo erabili estekaren azpiko CSV fitxategiaren aukera.';
     status('CSV konexioa: '+e.message);
   }finally{
     csvLoading=false;
